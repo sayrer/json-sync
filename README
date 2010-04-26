@@ -1,0 +1,5 @@
+background: see http://blog.mozilla.com/rob-sayre/2008/02/15/restful-partial-updates/
+
+todo: Synchronizer object at the bottom of the file needs to be completed.
+      Arrays need an identity function for their elements, so the algorithm
+      can be more intuitive when elements move around.
