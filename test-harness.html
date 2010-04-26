@@ -1,0 +1,15 @@
+<html>
+  <title>sync.js test harness</title>
+  <script>
+    function output(s) {
+      var console = document.getElementById("console");
+      console.innerHTML += s + " <br>";
+    }
+  </script>
+  <body>
+    <div id="console"></div>
+    <script src="MochiKit.js"></script>
+    <script src="sync.js"></script>
+    <script src="test.js"></script>
+  </body>
+</html>
