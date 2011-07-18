@@ -83,6 +83,82 @@ var currentJSON =
   "n": { "new3": 77 }, /* replaced primitive with object */
 }
 
+
+/* some MochiKit shims */
+function partial(f) {
+  var args = [this];
+  args.push.apply(args, Array.prototype.slice.call(arguments, 1, arguments.length));
+  return f.bind.apply(f, args);
+}
+
+function isEmpty(a) {
+  return a.length === 0;
+}
+
+function keys(o) {
+  return Object.keys(o);
+}
+
+function extend(a, b) {
+  a.push.apply(a, b);
+  return a;
+}
+
+function every(a, f) {
+  return a.every(f);
+}
+
+function forEach(a, f) {
+  return a.forEach(f);
+}
+
+function filter(f, a) {
+  return a.filter(f);
+}
+
+function map(f, a) {
+  return a.map(f);
+}
+
+function reduce(f, a, initial) {
+  return a.reduce(f, initial);
+}
+
+function chain(a) {
+  var res = [];
+  res.push.apply(res, a);
+  for (var i = 1; i < arguments.length; i++) {
+    res.push.apply(res, arguments[i]);
+  }
+  return res;
+}
+
+function arrayEqual(a, b) {
+  if (a.length != b.length) {
+    return false;
+  }
+  return a.every(function(element, index, array){ 
+    return element === b[index];
+  });
+}
+
+/* taken directly from MochiKit */
+function _flattenArray(res, lst) {
+  for (var i = 0; i < lst.length; i++) {
+    var o = lst[i];
+    if (o instanceof Array) {
+      arguments.callee(res, o);
+    } else {
+      res.push(o);
+    }
+  }
+  return res;
+}
+
+function flattenArray(lst) {
+  return _flattenArray([], lst);
+}
+
 /**
  * function detectUpdates(snapshot, current)
  *
@@ -138,7 +214,7 @@ var currentJSON =
  * two cases.
  */
 function isObjectOrArray(x) {
-  return !isNull(x) && typeof(x) == "object";
+  return ((x !== null) && (typeof(x) == "object"));
 }
 
 /**
@@ -253,7 +329,7 @@ function _detectUpdates(stack, snapshot, current) {
     function (key) {
       var old = snapshot[key];
       var update = current[key];
-      var path = concat(stack, [key]);
+      var path = stack.concat([key]);
 
       /* create */
       if (typeof(old) == "undefined")
@@ -388,15 +464,10 @@ function orderUpdates(updates) {
  * tell if a command has already been performed at a replica.
  *
  **/
-registerComparator("CommandComparator", 
-  function areCommands(a, b) {
-    return (a instanceof Command && b instanceof Command)
-  },
-  function compareCommands(a, b) { return a.equals(b) ? 0 : -1; }
-);
-
 function commandInList(command, commands) {
-  return (findValue(commands, command) != -1);
+  return commands.some(function(element, index, array) {
+      return (element instanceof Command && element.equals(command));
+  });
 }
 
 /**
@@ -469,7 +540,7 @@ function mustPrecede(command, earlierCommand) {
 function precedingCommandsConflict(command, conflictList) {
   if (isEmpty(conflictList))
     return false;
-  if (some(conflictList, partial(mustPrecede, command))) {
+  if (conflictList.some(partial(mustPrecede, command))) {
     return true;
   }
   return false;

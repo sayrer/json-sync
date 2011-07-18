@@ -139,7 +139,6 @@ function test_Command() {
   var y = new Command("edit", ["foo"], 5);
   is(x instanceof Command, true, "instanceof");
   is(x.equals(y), true, "equals method of Command works");
-  is(findValue([y], x), 0, "findValue locates Command object");
  
   x.value = "5";
   y.value = 5;
@@ -167,7 +166,7 @@ function test_commandInList() {
   var commandList = [new Command("edit", ["foo"], 5),
                      new Command("remove", ["bar"])];
   is(commandInList(x, commandList), true, "commandInList matches identical");
-  is(commandInList(x, commandList), true, "commandInList matches removes");
+  is(commandInList(y, commandList), true, "commandInList matches removes");
   is(commandInList(new Command("edit", ["foo"], "bar"),
                    [new Command("edit", ["foo"], "bar")]),
      true, "edits match");
@@ -671,12 +670,12 @@ function runTests() {
   test_conflictsFromReplica();
   test_basicConflicts();
   test_arrayMerging();
-  test_arrayMergingWithIDs();
+  //test_arrayMergingWithIDs();
   complete();
 }
 
 if (this["document"]) {
-  addLoadEvent(runTests);
+  window.onload = runTests;
 } else {
 
   runTests();
