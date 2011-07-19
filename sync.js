@@ -19,10 +19,6 @@ function filter(f, a) {
   return a.filter(f);
 }
 
-function reduce(f, a, initial) {
-  return a.reduce(f, initial);
-}
-
 function chain(a) {
   var res = [];
   res.push.apply(res, a);
@@ -493,10 +489,11 @@ function reconcile(commandLists) {
  * becomes a reference to the value at obj[foo][bar][baz].
  **/
 function pathToReference(obj, path) {
-  return reduce(function(reference, segment) {
-                  return reference ? reference[segment] : reference;
-                },
-                path, obj);
+  return path.reduce(
+    function(reference, segment) {
+      return reference ? reference[segment] : reference;
+    }, obj
+  );
 }
 
 /**
