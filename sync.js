@@ -3,7 +3,8 @@
 /* some MochiKit shims */
 function partial(f) {
   var args = [this];
-  args.push.apply(args, Array.prototype.slice.call(arguments, 1, arguments.length));
+  args.push.apply(args, Array.prototype.slice.call(arguments, 1,
+                                                   arguments.length));
   return f.bind.apply(f, args);
 }
 
@@ -42,12 +43,14 @@ function chain(a) {
 }
 
 function arrayEqual(a, b) {
-  if (a.length != b.length) {
+  if (a.length != b.length)
     return false;
-  }
-  return a.every(function(element, index, array){ 
-    return element === b[index];
-  });
+
+  return a.every(
+    function(element, index, array) {
+      return element === b[index];
+    }
+  );
 }
 
 /* taken directly from MochiKit */
@@ -84,7 +87,7 @@ function flattenArray(lst) {
  *   1.) create
  *   2.) remove
  *   3.) edit
- *  
+ *
  * We need to determine which changes have occured, and sequence them
  * such that the object is never in an incoherent state.
  *
@@ -109,7 +112,7 @@ function flattenArray(lst) {
  *   }
  *
  * the following paths map to these values
- * 
+ *
  *   /foo       => 1
  *   /bar/baz   => 42
  *   /bar/qux/2 => 45
@@ -122,7 +125,7 @@ function flattenArray(lst) {
  * two cases.
  */
 function isObjectOrArray(x) {
-  return ((x !== null) && (typeof(x) == "object"));
+  return ((x !== null) && (typeof(x) == 'object'));
 }
 
 /**
@@ -137,17 +140,17 @@ function identifySuspects(snapshot, current) {
    * code is suboptimal if both arguments are arrays, since we could
    * simply run Object.keys() on the longer of the two in that case.
    **/
-  var keySet = {}
+  var keySet = {};
   forEach(extend(Object.keys(snapshot), Object.keys(current)),
-	  function(key) { keySet[key] = true }); 
+          function(key) { keySet[key] = true });
   /**
    * Using the keys present in one or both objects, filter out those
    * that are present with identical primitive values.
    **/
-  return filter(function(key) { 
+  return filter(function(key) {
                   return (isObjectOrArray(snapshot[key]) ||
-	                  isObjectOrArray(current[key]) ||
-	                  snapshot[key] !== current[key]);
+                          isObjectOrArray(current[key]) ||
+                          snapshot[key] !== current[key]);
                 }, Object.keys(keySet));
 }
 
@@ -162,7 +165,7 @@ function Command(action, path, value) {
 }
 Command.prototype = {
   equals: function(other) {
-    return (other && other.action == this.action && 
+    return (other && other.action == this.action &&
             arrayEqual(this.path, other.path) &&
             (isObjectOrArray(other.value) && isObjectOrArray(this.value) ?
              other.value.constructor == this.value.constructor :
@@ -175,7 +178,7 @@ Command.prototype = {
     return other.path.length > this.path.length &&
            arrayEqual(other.path.slice(0, this.path.length), this.path);
   }
-}
+};
 
 /**
  * Objects need to be created in preorder (before their child nodes),
@@ -184,12 +187,12 @@ Command.prototype = {
 function created(path, value) {
   if (isObjectOrArray(value)) {
     /* object created. Prepend the creation record to its children */
-    return extend([new Command("create", path, value.constructor())],
+    return extend([new Command('create', path, value.constructor())],
                   _detectUpdates(path, {}, value));
   }
 
   /* primitive created */
-  return [new Command("create", path, value)];
+  return [new Command('create', path, value)];
 }
 
 /**
@@ -200,11 +203,11 @@ function removed(path, value) {
   if (isObjectOrArray(value)) {
     /* Object removed. Append the removal record to its children. */
     return extend(_detectUpdates(path, value, {}),
-                  [new Command("remove", path)]);
+                  [new Command('remove', path)]);
   }
-  
+
   /* primitive removed */
-  return [new Command("remove", path)];
+  return [new Command('remove', path)];
 }
 
 /**
@@ -218,33 +221,33 @@ function removed(path, value) {
 function edited(path, old, update) {
   if (isObjectOrArray(old) && !isObjectOrArray(update)) {
     /* object replaced by primitive */
-    return extend([new Command("edit", path, update)],
+    return extend([new Command('edit', path, update)],
                   _detectUpdates(path, old, {}));
   } else if (!isObjectOrArray(old) && isObjectOrArray(update)) {
     /* primitive replaced by object */
-    return extend([new Command("edit", path, update.constructor())],
+    return extend([new Command('edit', path, update.constructor())],
                   _detectUpdates(path, {}, update));
   }
-  
+
   /* primitive edit */
-  return [new Command("edit", path, update)];   
+  return [new Command('edit', path, update)];
 }
 
 
 function _detectUpdates(stack, snapshot, current) {
   /* check for edits and recurse into objects and arrays */
   return flattenArray(map(
-    function (key) {
+    function(key) {
       var old = snapshot[key];
       var update = current[key];
       var path = stack.concat([key]);
 
       /* create */
-      if (typeof(old) == "undefined")
+      if (typeof(old) == 'undefined')
         return created(path, update);
 
       /* remove */
-      if (typeof(update) == "undefined")
+      if (typeof(update) == 'undefined')
         return removed(path, old);
 
       /* edit */
@@ -252,7 +255,7 @@ function _detectUpdates(stack, snapshot, current) {
         return edited(path, old, update);
 
       /* recurse into object/array values at the same path */
-      /** 
+      /**
        * We need to detect container type changes. This type of edit
        * changes the algebra described by Ramsey and Csirmaz a bit,
        * because it imposes additional ordering constraints on the
@@ -277,13 +280,13 @@ function _detectUpdates(stack, snapshot, current) {
        * Object at path π, and recursive creation of the Object's
        * members. This means we have to interleave creates and
        * removes, unlike Ramsey and Csirmaz.
-       * 
+       *
        **/
 
       ///XXX change this to recurse and return
       var changeSequence = [];
       if (old.constructor != update.constructor) {
-        changeSequence.push(new Command("edit", path, update.constructor()));
+        changeSequence.push(new Command('edit', path, update.constructor()));
       }
 
       /**
@@ -292,7 +295,7 @@ function _detectUpdates(stack, snapshot, current) {
        **/
       return extend(changeSequence,
                     _detectUpdates(path, old, update));
-                    
+
     }, identifySuspects(snapshot, current)));
 }
 var detectUpdates = partial(_detectUpdates, []);
@@ -310,8 +313,8 @@ var detectUpdates = partial(_detectUpdates, []);
  *
  * (a) Commands of the form edit (π, Dir(m)), in any order determined
  *     by π.
- * (b) Commands of the form create (π, X), in preorder. 
- * (c) Commands of the form remove (π), in postorder. 
+ * (b) Commands of the form create (π, X), in preorder.
+ * (c) Commands of the form remove (π), in postorder.
  * (d) Commands of the form edit (π, File(m, x)), in any order
  *     determined by π.
  *
@@ -321,26 +324,26 @@ function orderUpdates(updates) {
   var creates = [];
   var removes = [];
   var edits = [];
-  
-  /** 
+
+  /**
    *  _detectUpdates orders creates and removes canonically, so we
    *  just need to weed out the edits.
    **/
   forEach(updates, function(update) {
-    if (update.action == "edit")
+    if (update.action == 'edit')
       isObjectOrArray(value) ? dirEdits.push(update) : edits.push(update);
-    else if (update.action == "create")
+    else if (update.action == 'create')
       creates.push(update);
-    else if (update.action == "remove")
+    else if (update.action == 'remove')
       removes.push(update);
   });
-  
+
   return chain(dirEdits, creates, removes, edits);
 }
 
 
 /**
- * 
+ *
  *
  * Excerpt from Ramsey and Csirmaz:
  *
@@ -381,14 +384,14 @@ function commandInList(command, commands) {
 /**
  * Now we find commands with paths that are of interest, make sure
  * it's not the same command, and then check to see if it's a break.
- * 
+ *
  * function conflictsFromReplicas(command, commandListsFromOtherReplicas)
  *
- * @param  command 
+ * @param  command
  *         A Command object.
  *
  * @param  commandListsFromOtherReplicas
- *         A list of command lists from other replicas ([[],[],[]])
+ *         A list of command lists from other replicas ([[],[],[]]).
  *
  * @return A list of objects conforming to the interface:
  *         {
@@ -396,35 +399,35 @@ function commandInList(command, commands) {
  *           conflicts: [Command, Command, Command...]
  *           commandList: [Command, Command, Command...]
  *         }
- *  
+ *
  **/
- 
+
 /**
  * Check whether an edit or create operation has been attempted under
  * a remove.
- **/ 
+ **/
 function isBreak(a, b) {
-  return a.isParentOf(b) && 
-         ((!isObjectOrArray(a.value) || a.action == "remove") &&
-          b.action != "remove");
+  return a.isParentOf(b) &&
+         ((!isObjectOrArray(a.value) || a.action == 'remove') &&
+          b.action != 'remove');
 }
- 
+
 /**
  * Check whether the commands would result in a broken graph,
  * or whether they are attempting to insert the different values
  * at the same path.
  **/
 function doesConflict(command, other) {
-  var broken = isBreak(command, other) || isBreak(other, command); 
+  var broken = isBreak(command, other) || isBreak(other, command);
   return broken || (arrayEqual(command.path, other.path)
                     && !command.equals(other));
 }
 
 function conflictsFromReplica(command, commandList) {
     return {
-      "command": command,
-      "conflicts": filter(partial(doesConflict, command), commandList),
-      "commandList": commandList
+      'command': command,
+      'conflicts': filter(partial(doesConflict, command), commandList),
+      'commandList': commandList
     };
 }
 
@@ -434,12 +437,12 @@ function conflictsFromReplicas(command, commandListsFromOtherReplicas) {
 }
 
 /**
- * If a command doesn't conflict, we still might have to put it in the 
+ * If a command doesn't conflict, we still might have to put it in the
  * conflict list if an earlier command did conflict, and that command
  * is a precondition for the current command.
  **/
-function mustPrecede(command, earlierCommand) {  
-  if (earlierCommand.action == "edit")
+function mustPrecede(command, earlierCommand) {
+  if (earlierCommand.action == 'edit')
     return false;
 
   return earlierCommand.isParentOf(command);
@@ -467,12 +470,13 @@ function reconcile(commandLists) {
     for (var j = 0; j < commandLists.length; ++j) {
       if (i != j) {
         forEach(commandLists[i],
-          function (command) {
+          function(command) {
             if (!commandInList(command, commandLists[j])) {
-              var others = chain(commandLists.slice(0, i), 
+              var others = chain(commandLists.slice(0, i),
                                  commandLists.slice(i + 1));
               var conflict = conflictsFromReplicas(command, others);
-              if (every(conflict, function(c) { return c.conflicts.length == 0 })) {
+              if (every(conflict,
+                        function(c) { return c.conflicts.length == 0 })) {
                 if (precedingCommandsConflict(command, conflicts[j])) {
                   conflicts[j].push(command);
                 } else {
@@ -487,8 +491,8 @@ function reconcile(commandLists) {
       }
     }
   }
-    
-  return {"propagations":propagations, "conflicts":conflicts};
+
+  return {'propagations': propagations, 'conflicts': conflicts};
 }
 
 /**
@@ -496,22 +500,22 @@ function reconcile(commandLists) {
  * becomes a reference to the value at obj[foo][bar][baz].
  **/
 function pathToReference(obj, path) {
-  return reduce(function (reference, segment) {
+  return reduce(function(reference, segment) {
                   return reference ? reference[segment] : reference;
-                }, 
+                },
                 path, obj);
 }
 
 /**
  * Apply a single command to an object.
  **/
-function applyCommand(target, command) {  
+function applyCommand(target, command) {
   var container =
     pathToReference(target, command.path.slice(0, command.path.length - 1));
 
-  if (command.action == "remove")
+  if (command.action == 'remove')
     delete container[command.path[command.path.length - 1]];
-  
+
   container[command.path[command.path.length - 1]] = command.value;
 }
 
@@ -524,16 +528,16 @@ function applyCommands(target, commands) {
 
 /**
  * Now we define a more traditional OO api to wrap this functionality.
- * 
- * @param identifiers 
- *        A string or array of strings for the synchronizer to identify 
+ *
+ * @param identifiers
+ *        A string or array of strings for the synchronizer to identify
  *        fields to be used as a identifiers.
- * 
+ *
  * @param onConflict
  *        A function that will be called when a conflict arises.
  *
  * @param onPropagate
- *        A function that will be called when a propagation arises. 
+ *        A function that will be called when a propagation arises.
  **/
 function Synchronizer(ids, onConflict, onPropagate) {
   this.identifiers = isObjectorArray(ids) ? ids : [ids];
@@ -553,6 +557,6 @@ Synchronizer.prototype = {
    *        from the common baseline.
    **/
   sync: function(snapshot, jsonObjects) {
-    
+
   }
-}
+};
