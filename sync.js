@@ -15,10 +15,6 @@ function forEach(a, f) {
   return a.forEach(f);
 }
 
-function filter(f, a) {
-  return a.filter(f);
-}
-
 function chain(a) {
   var res = [];
   res.push.apply(res, a);
