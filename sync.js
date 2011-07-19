@@ -91,14 +91,6 @@ function partial(f) {
   return f.bind.apply(f, args);
 }
 
-function isEmpty(a) {
-  return a.length === 0;
-}
-
-function keys(o) {
-  return Object.keys(o);
-}
-
 function extend(a, b) {
   a.push.apply(a, b);
   return a;
@@ -227,10 +219,10 @@ function identifySuspects(snapshot, current) {
   /**
    * First, the union of both objects' keys must be calculated. This
    * code is suboptimal if both arguments are arrays, since we could
-   * simply run keys() on the longer of the two in that case.
+   * simply run Object.keys() on the longer of the two in that case.
    **/
   var keySet = {}
-  forEach(extend(keys(snapshot), keys(current)),
+  forEach(extend(Object.keys(snapshot), Object.keys(current)),
 	  function(key) { keySet[key] = true }); 
   /**
    * Using the keys present in one or both objects, filter out those
@@ -240,7 +232,7 @@ function identifySuspects(snapshot, current) {
                   return (isObjectOrArray(snapshot[key]) ||
 	                  isObjectOrArray(current[key]) ||
 	                  snapshot[key] !== current[key]);
-                }, keys(keySet));
+                }, Object.keys(keySet));
 }
 
 /**
@@ -538,7 +530,7 @@ function mustPrecede(command, earlierCommand) {
 }
 
 function precedingCommandsConflict(command, conflictList) {
-  if (isEmpty(conflictList))
+  if (conflictList.length === 0)
     return false;
   if (conflictList.some(partial(mustPrecede, command))) {
     return true;
