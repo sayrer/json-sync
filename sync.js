@@ -1,5 +1,3 @@
-/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-
 /* some MochiKit shims */
 function partial(f) {
   var args = [this];
@@ -11,10 +9,6 @@ function partial(f) {
 function extend(a, b) {
   a.push.apply(a, b);
   return a;
-}
-
-function every(a, f) {
-  return a.every(f);
 }
 
 function forEach(a, f) {
@@ -475,8 +469,8 @@ function reconcile(commandLists) {
               var others = chain(commandLists.slice(0, i),
                                  commandLists.slice(i + 1));
               var conflict = conflictsFromReplicas(command, others);
-              if (every(conflict,
-                        function(c) { return c.conflicts.length == 0 })) {
+              if (conflict.every(
+                  function(c) { return c.conflicts.length == 0 })) {
                 if (precedingCommandsConflict(command, conflicts[j])) {
                   conflicts[j].push(command);
                 } else {
