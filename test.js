@@ -248,6 +248,53 @@ function checkSync(obj1, obj2, path, value) {
   is(field1, value, path + " correct value");
 }
 
+// the README examples
+
+var snapshotJSON =
+{
+  "x": 42,
+  "a": 1,
+  "b":
+  {
+    "c": 2,
+    "d":
+    {
+      "e": 3,
+      "f": 4
+    },
+    "g": 5
+  },
+  "h": 6.6,
+  "i": [7, 8, 9],
+  "j": 10,
+  "k": { "m": 11 },
+  "n": 66,
+}
+
+var currentJSON =
+{
+  "x": 43,             /* edited */ 
+  "a": 1,
+  "new": 11,           /* created */
+  "b":
+  {
+    "c": 2,
+    "new2": 22,        /* created */
+    "d":
+    {
+      "e": 3,
+      /*"f": 4*/       /* removed */
+    },
+    "g": 55,           /* edited  */
+  },
+  /* "h": 6.6, */      /* removed */   
+  "i": [7, 8, 9, 99],  /* added array element */
+  "j": 10,
+  "k": 42,             /* replaced object with primitive */
+  "n": { "new3": 77 }, /* replaced primitive with object */
+}
+
+
 function test_complexReconcileWithNoConflicts() {
   var updates = detectUpdates(snapshotJSON, currentJSON);
   is(updates.length, 11, "detect correct number of updates");
