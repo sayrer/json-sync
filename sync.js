@@ -436,8 +436,6 @@ function mustPrecede(command, earlierCommand) {
 }
 
 function precedingCommandsConflict(command, conflictList) {
-  if (conflictList.length === 0)
-    return false;
   if (conflictList.some(partial(mustPrecede, command))) {
     return true;
   }
