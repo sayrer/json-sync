@@ -1,3 +1,5 @@
+/* This file currently requires ES5, mostly for map, reduce, et al. */
+
 /* some MochiKit shims */
 function partial(f) {
   var args = [this];
