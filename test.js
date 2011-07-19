@@ -225,9 +225,11 @@ function pathToArray(path) {
 }
 
 function commandFromArray(key, array) {
-  var c = filter(function(c) { 
-                   return ("/" + c.path.join("/")) == key;
-                 }, array);
+  var c = array.filter(
+    function(c) { 
+      return ("/" + c.path.join("/")) == key;
+    }
+  );
   return c[0];
 }
 
