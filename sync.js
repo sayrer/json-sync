@@ -133,11 +133,13 @@ function identifySuspects(snapshot, current) {
    * Using the keys present in one or both objects, filter out those
    * that are present with identical primitive values.
    **/
-  return filter(function(key) {
-                  return (isObjectOrArray(snapshot[key]) ||
-                          isObjectOrArray(current[key]) ||
-                          snapshot[key] !== current[key]);
-                }, Object.keys(keySet));
+  return Object.keys(keySet).filter(
+    function(key) {
+      return (isObjectOrArray(snapshot[key]) ||
+              isObjectOrArray(current[key]) ||
+              snapshot[key] !== current[key]);
+    }
+  );
 }
 
 /**
@@ -414,7 +416,7 @@ function doesConflict(command, other) {
 function conflictsFromReplica(command, commandList) {
     return {
       'command': command,
-      'conflicts': filter(partial(doesConflict, command), commandList),
+      'conflicts': commandList.filter(partial(doesConflict, command)),
       'commandList': commandList
     };
 }
