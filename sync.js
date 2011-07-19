@@ -39,11 +39,10 @@ function arrayEqual(a, b) {
 function _flattenArray(res, lst) {
   for (var i = 0; i < lst.length; i++) {
     var o = lst[i];
-    if (o instanceof Array) {
+    if (o instanceof Array)
       arguments.callee(res, o);
-    } else {
+    else
       res.push(o);
-    }
   }
   return res;
 }
@@ -147,6 +146,7 @@ function Command(action, path, value) {
   this.path = path;
   this.value = value;
 }
+
 Command.prototype = {
   equals: function(other) {
     return (other && other.action == this.action &&
@@ -270,9 +270,8 @@ function _detectUpdates(stack, snapshot, current) {
 
       ///XXX change this to recurse and return
       var changeSequence = [];
-      if (old.constructor != update.constructor) {
+      if (old.constructor != update.constructor)
         changeSequence.push(new Command('edit', path, update.constructor()));
-      }
 
       /**
        * Now we recurse into objects and arrays, and append
@@ -436,10 +435,7 @@ function mustPrecede(command, earlierCommand) {
 }
 
 function precedingCommandsConflict(command, conflictList) {
-  if (conflictList.some(partial(mustPrecede, command))) {
-    return true;
-  }
-  return false;
+  return conflictList.some(partial(mustPrecede, command));
 }
 
 function reconcile(commandLists) {
