@@ -11,10 +11,6 @@ function extend(a, b) {
   return a;
 }
 
-function forEach(a, f) {
-  return a.forEach(f);
-}
-
 function chain(a) {
   var res = [];
   res.push.apply(res, a);
@@ -122,8 +118,11 @@ function identifySuspects(snapshot, current) {
    * simply run Object.keys() on the longer of the two in that case.
    **/
   var keySet = {};
-  forEach(extend(Object.keys(snapshot), Object.keys(current)),
-          function(key) { keySet[key] = true });
+  var keys = Object.keys(snapshot);
+  keys.push.apply(keys,Object.keys(current));
+  for (var i=0; i < keys.length; i++)
+    keySet[keys[i]] = true;
+
   /**
    * Using the keys present in one or both objects, filter out those
    * that are present with identical primitive values.
@@ -314,7 +313,7 @@ function orderUpdates(updates) {
    *  _detectUpdates orders creates and removes canonically, so we
    *  just need to weed out the edits.
    **/
-  forEach(updates, function(update) {
+  updates.forEach(function(update) {
     if (update.action == 'edit')
       isObjectOrArray(value) ? dirEdits.push(update) : edits.push(update);
     else if (update.action == 'create')
@@ -442,7 +441,7 @@ function reconcile(commandLists) {
   var propagations = [];
   var conflicts = [];
 
-  forEach(commandLists, function() {
+  commandLists.forEach(function() {
     propagations.push([]);
     conflicts.push([]);
   });
@@ -450,7 +449,7 @@ function reconcile(commandLists) {
   for (var i = 0; i < commandLists.length; ++i) {
     for (var j = 0; j < commandLists.length; ++j) {
       if (i != j) {
-        forEach(commandLists[i],
+        commandLists[i].forEach(
           function(command) {
             if (!commandInList(command, commandLists[j])) {
               var others = chain(commandLists.slice(0, i),
@@ -505,7 +504,7 @@ function applyCommand(target, command) {
  * Apply a list of commands to an object.
  **/
 function applyCommands(target, commands) {
-  forEach(commands, partial(applyCommand, target));
+  commands.forEach(partial(applyCommand, target));
 }
 
 /**
