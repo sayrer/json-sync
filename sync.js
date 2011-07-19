@@ -19,10 +19,6 @@ function filter(f, a) {
   return a.filter(f);
 }
 
-function map(f, a) {
-  return a.map(f);
-}
-
 function reduce(f, a, initial) {
   return a.reduce(f, initial);
 }
@@ -230,7 +226,8 @@ function edited(path, old, update) {
 
 function _detectUpdates(stack, snapshot, current) {
   /* check for edits and recurse into objects and arrays */
-  return flattenArray(map(
+  var suspects = identifySuspects(snapshot, current);
+  return flattenArray(suspects.map(
     function(key) {
       var old = snapshot[key];
       var update = current[key];
@@ -290,7 +287,8 @@ function _detectUpdates(stack, snapshot, current) {
       return extend(changeSequence,
                     _detectUpdates(path, old, update));
 
-    }, identifySuspects(snapshot, current)));
+    }
+  ));
 }
 var detectUpdates = partial(_detectUpdates, []);
 
@@ -426,8 +424,9 @@ function conflictsFromReplica(command, commandList) {
 }
 
 function conflictsFromReplicas(command, commandListsFromOtherReplicas) {
-  return map(partial(conflictsFromReplica, command),
-             commandListsFromOtherReplicas);
+  return commandListsFromOtherReplicas.map(
+    partial(conflictsFromReplica, command)
+  );
 }
 
 /**
